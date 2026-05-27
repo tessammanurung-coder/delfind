@@ -12,6 +12,7 @@ sqlalchemy==2.0.36             # ORM
 python-multipart==0.0.12       # File upload support untuk FastAPI
 pydantic==2.9.2                # Data validation (sudah include di FastAPI)
 pytz==2024.1                   # Timezone handling
+psycopg2-binary==2.9.9
 
 # ─── Untuk PostgreSQL (production, ganti SQLite) ─────────────────────────────
 # psycopg2-binary==2.9.10
