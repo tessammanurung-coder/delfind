@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Del-Find - IT Del</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .tab-active {
+            border-bottom-width: 3px;
+            border-color: #1e3a8a; /* bg-blue-900 */
+            color: #1e3a8a;
+            font-weight: 700;
+        }
+        .filter-btn-active {
+            background-color: #1e3a8a;
+            color: white;
+            border-color: #1e3a8a;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800">
+
+    <nav class="bg-blue-900 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-white p-1 rounded-full w-10 h-10 flex items-center justify-center font-bold text-blue-900 shadow">
+                        ITD
+                    </div>
+                    <div>
+                        <span class="font-bold text-xl block tracking-wide">Del-Find</span>
+                        <span class="text-xs text-blue-200 block -mt-1">Sistem Informasi IT Del</span>
+                    </div>
+                </div>
+                <div class="hidden md:flex space-x-6 font-medium">
+                    <a href="#beranda" class="hover:text-blue-300 transition">Beranda</a>
+                    <a href="#section-nav-bar" class="hover:text-blue-300 transition">Daftar Log</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <header id="beranda" class="bg-gradient-to-r from-blue-900 to-indigo-800 text-white py-14 px-4 text-center">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-3xl md:text-5xl font-extrabold mb-3">Kehilangan atau Menemukan Barang di Kampus?</h1>
+            <p class="text-sm md:text-lg text-blue-100 mb-6 max-w-2xl mx-auto">Sistem informasi terpusat untuk membantu civitas akademika IT Del menemukan kembali barang mereka yang hilang atau melaporkan barang temuan.</p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="#section-nav-bar" class="bg-white text-blue-900 hover:bg-gray-100 px-6 py-2.5 rounded-lg font-semibold shadow transition">Lihat Daftar Log</a>
+                <button onclick="bukaModalLaporan()" class="bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-lg font-bold text-base shadow-lg transition transform scale-100 hover:scale-105 cursor-pointer">
+                    <i class="fa-solid fa-plus mr-2"></i>Isi Formulir Laporan
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-yellow-500 flex items-center space-x-4">
+                <div class="p-3 bg-yellow-100 rounded-lg text-yellow-600 text-2xl"><i class="fa-solid fa-magnifying-glass"></i></div>
+                <div>
+                    <h3 class="text-gray-500 text-xs font-semibold uppercase">Total Dicari (Hilang)</h3>
+                    <p class="text-2xl font-bold text-gray-800" id="stat-hilang">0</p>
+                </div>
+            </div>
+            <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-blue-500 flex items-center space-x-4">
+                <div class="p-3 bg-blue-100 rounded-lg text-blue-600 text-2xl"><i class="fa-solid fa-box-open"></i></div>
+                <div>
+                    <h3 class="text-gray-500 text-xs font-semibold uppercase">Total Ditemukan</h3>
+                    <p class="text-2xl font-bold text-gray-800" id="stat-temuan">0</p>
+                </div>
+            </div>
+            <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-green-500 flex items-center space-x-4">
+                <div class="p-3 bg-green-100 rounded-lg text-green-600 text-2xl"><i class="fa-solid fa-circle-check"></i></div>
+                <div>
+                    <h3 class="text-gray-500 text-xs font-semibold uppercase">Selesai Dikembalikan</h3>
+                    <p class="text-2xl font-bold text-gray-800" id="stat-selesai">0</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="area-kontrol-utama" class="bg-white p-6 rounded-xl shadow-sm border mb-6 space-y-4">
+            <div class="flex flex-col items-center justify-center text-center max-w-2xl mx-auto w-full">
+                <div class="w-full relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" id="input-pencarian" oninput="jalankanFilterDanPencarian()" placeholder="Cari nama barang atau lokasi di sini..." class="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent text-center">
+                </div>
+            </div>
+
+            <div id="panel-aksi-massal" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-3 flex flex-wrap items-center justify-between gap-2 animate-fade-in max-w-4xl mx-auto">
+                <div class="flex items-center space-x-2 text-sm text-blue-900 font-semibold">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span id="txt-jumlah-terpilih">0 barang terpilih</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="eksekusiKlaimMassal(); event.stopPropagation();" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow transition">
+                        <i class="fa-solid fa-check-double mr-1"></i>Tandai Klaim/Selesai
+                    </button>
+                    <button onclick="eksekusiHapusMassal(); event.stopPropagation();" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow transition">
+                        <i class="fa-solid fa-trash-can mr-1"></i>Hapus Terpilih
+                    </button>
+                    <button onclick="togglePilihSemua(false); event.stopPropagation();" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition">
+                        Batal
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            
+            <div id="section-nav-bar" class="bg-white border rounded-xl shadow-sm flex p-1 sticky top-16 z-40 max-w-md mx-auto">
+                <button id="btn-tab-feed" onclick="switchSection('feed'); event.stopPropagation();" class="flex-1 py-2.5 text-center text-sm font-semibold transition rounded-lg text-gray-600 hover:bg-gray-50 tab-active">
+                    <i class="fa-solid fa-table-cells-large mr-2"></i>Icon View
+                </button>
+                <button id="btn-tab-list" onclick="switchSection('list'); event.stopPropagation();" class="flex-1 py-2.5 text-center text-sm font-semibold transition rounded-lg text-gray-600 hover:bg-gray-50">
+                    <i class="fa-solid fa-list mr-2"></i>List View
+                </button>
+            </div>
+
+            <div class="flex justify-center items-center space-x-2 pt-2">
+                <button id="filter-all" onclick="gantiKategoriFilter('all')" class="px-4 py-1.5 border rounded-full text-xs font-bold transition shadow-sm filter-btn-active">
+                    Semua Status
+                </button>
+                <button id="filter-unclaimed" onclick="gantiKategoriFilter('unclaimed')" class="px-4 py-1.5 border rounded-full text-xs font-bold transition shadow-sm bg-white text-gray-600 border-gray-300 hover:bg-gray-50">
+                    Belum Diklaim / Hilang
+                </button>
+                <button id="filter-claimed" onclick="gantiKategoriFilter('claimed')" class="px-4 py-1.5 border rounded-full text-xs font-bold transition shadow-sm bg-white text-gray-600 border-gray-300 hover:bg-gray-50">
+                    Sudah Diklaim (Selesai)
+                </button>
+            </div>
+
+            <div id="section-feed-view" class="space-y-4 pt-2">
+                <div class="flex items-center justify-between border-b pb-2">
+                    <h2 class="text-lg font-bold text-gray-800"><i class="fa-solid fa-table-cells-large mr-2 text-blue-900"></i>Log Tampilan Grid</h2>
+                    <button onclick="togglePilihSemua(true); event.stopPropagation();" class="text-xs text-blue-700 font-semibold hover:underline">Centang Semua Halaman Ini</button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="barang-container-feed">
+                    <p class="text-gray-500 col-span-full text-center py-10">Memuat data dari server...</p>
+                </div>
+            </div>
+
+            <div id="section-list-view" class="space-y-4 pt-2 hidden">
+                <div class="flex items-center justify-between border-b pb-2">
+                    <h2 class="text-lg font-bold text-gray-800"><i class="fa-solid fa-list mr-2 text-indigo-900"></i>Log Tampilan Baris</h2>
+                    <span class="text-xs text-gray-500">Hello World.</span>
+                </div>
+
+                <div class="bg-white border rounded-xl shadow-sm overflow-hidden" id="barang-container-list">
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="modal-laporan" class="fixed inset-0 z-50 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="tutupModalLaporan()"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border" onclick="event.stopPropagation()">
+                <div class="bg-blue-900 px-6 py-4 flex items-center justify-between text-white">
+                    <h3 class="text-lg font-bold"><i class="fa-solid fa-pen-to-square mr-2 text-green-400"></i>Buat Laporan Baru</h3>
+                    <button onclick="tutupModalLaporan()" class="text-white hover:text-gray-300 text-xl font-bold focus:outline-none">&times;</button>
+                </div>
+                
+                <div class="bg-white p-6">
+                    <form id="form-laporan" class="space-y-4" enctype="multipart/form-data">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Jenis Laporan</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="border rounded-lg p-2.5 flex items-center justify-center space-x-2 cursor-pointer hover:bg-gray-50">
+                                    <input type="radio" name="status" value="Hilang" checked class="text-blue-900">
+                                    <span class="text-sm font-medium text-red-600">Kehilangan</span>
+                                </label>
+                                <label class="border rounded-lg p-2.5 flex items-center justify-center space-x-2 cursor-pointer hover:bg-gray-50">
+                                    <input type="radio" name="status" value="Ditemukan" class="text-blue-900">
+                                    <span class="text-sm font-medium text-blue-600">Menemukan</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Nama Barang</label>
+                            <input type="text" id="nama-barang" required placeholder="Contoh: Flashdisk SanDisk 32GB" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Lokasi Kejadian / Penemuan</label>
+                            <input type="text" id="lokasi" required placeholder="Contoh: Auditorium / Perpustakaan" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Nama Pelapor / Kontak</label>
+                            <input type="text" id="pelapor" required placeholder="Nama Anda / Kontak Handphone" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Foto Barang (Opsional)</label>
+                            <input type="file" id="foto-barang" accept="image/*" class="w-full text-xs text-gray-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-gray-300 rounded-lg p-1">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Deskripsi Tambahan</label>
+                            <textarea id="deskripsi" rows="3" required placeholder="Ciri-ciri khusus..." class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900"></textarea>
+                        </div>
+
+                        <div class="flex items-center justify-end space-x-3 pt-2 border-t mt-4">
+                            <button type="button" onclick="tutupModalLaporan()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded-lg text-sm transition">Batal</button>
+                            <button type="submit" class="bg-blue-900 hover:bg-blue-800 text-white font-bold px-5 py-2 rounded-lg text-sm shadow transition">
+                                Kirim Laporan <i class="fa-solid fa-paper-plane ml-1"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-detail-barang" class="fixed inset-0 z-50 overflow-y-auto hidden" aria-labelledby="modal-detail-title" role="dialog" aria-modal="true">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="tutupModalDetail()"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full border" onclick="event.stopPropagation()">
+                <div class="bg-blue-900 px-6 py-4 flex items-center justify-between text-white">
+                    <h3 class="text-lg font-bold"><i class="fa-solid fa-circle-info mr-2 text-yellow-400"></i>Detail Informasi Barang</h3>
+                    <button onclick="tutupModalDetail()" class="text-white hover:text-gray-300 text-xl font-bold focus:outline-none">&times;</button>
+                </div>
+                <div class="bg-white p-6 space-y-4">
+                    <div id="detail-foto-container" class="w-full h-48 bg-gray-100 rounded-xl border overflow-hidden hidden flex items-center justify-center">
+                        <img id="detail-foto" src="" class="w-full h-full object-cover">
+                    </div>
+                    <div class="space-y-2">
+                        <div>
+                            <span class="block text-[10px] font-bold uppercase text-gray-400">Nama Barang</span>
+                            <p id="detail-nama" class="text-base font-bold text-gray-900"></p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <span class="block text-[10px] font-bold uppercase text-gray-400">Jenis / Status</span>
+                                <span id="detail-status" class="inline-block text-xs font-bold px-2 py-0.5 rounded-full uppercase mt-0.5"></span>
+                            </div>
+                            <div>
+                                <span class="block text-[10px] font-bold uppercase text-gray-400">Tanggal Log</span>
+                                <p id="detail-tanggal" class="text-xs text-gray-700 font-medium mt-0.5"></p>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] font-bold uppercase text-gray-400">Lokasi</span>
+                            <p id="detail-lokasi" class="text-xs text-gray-700 font-medium"></p>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] font-bold uppercase text-gray-400">Pelapor / Kontak</span>
+                            <p id="detail-pelapor" class="text-xs text-gray-700 font-medium"></p>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] font-bold uppercase text-gray-400">Deskripsi Tambahan</span>
+                            <p id="detail-deskripsi" class="text-xs text-gray-600 bg-gray-50 p-2.5 rounded-lg border mt-1 font-mono whitespace-pre-line"></p>
+                        </div>
+                    </div>
+                    
+                    <div class="pt-3 border-t flex items-center justify-between gap-2">
+                        <button id="detail-btn-hapus" class="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-1 transition">
+                            <i class="fa-solid fa-trash-can"></i> Hapus
+                        </button>
+                        <div class="flex items-center gap-2">
+                            <button id="detail-btn-klaim" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-1 transition hidden">
+                                <i class="fa-solid fa-circle-check"></i> Klaim
+                            </button>
+                            <button id="detail-btn-hubungi" class="bg-blue-900 hover:bg-blue-800 text-white px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-1 transition">
+                                <i class="fa-solid fa-envelope"></i> Hubungi
+                            </button>
+                            <button onclick="tutupModalDetail()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded-lg text-xs font-bold transition">Tutup</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-gray-900 text-gray-400 py-6 mt-20 border-t border-gray-800 text-center text-sm">
+        <p>&copy; 2026 Institut Teknologi Del. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        const BASE_URL = 'http://localhost:8000';
+        
+        const form = document.getElementById('form-laporan');
+        const fotoInput = document.getElementById('foto-barang');
+        const feedContainer = document.getElementById('barang-container-feed');
+        const listContainer = document.getElementById('barang-container-list');
+        const modalLaporan = document.getElementById('modal-laporan');
+        const panelAksiMassal = document.getElementById('panel-aksi-massal');
+        const txtJumlahTerpilih = document.getElementById('txt-jumlah-terpilih');
+        
+        const tabFeed = document.getElementById('btn-tab-feed');
+        const tabList = document.getElementById('btn-tab-list');
+        const viewFeed = document.getElementById('section-feed-view');
+        const viewList = document.getElementById('section-list-view');
+
+        const statHilangEl = document.getElementById('stat-hilang');
+        const statTemuanEl = document.getElementById('stat-temuan');
+        const statSelesaiEl = document.getElementById('stat-selesai');
+
+        // State Global
+        let dataSemuaBarang = [];
+        let itemsTerpilih = []; 
+        let filterKategoriAktif = 'all'; // all, unclaimed, claimed
+
+        function bukaModalLaporan() {
+            modalLaporan.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function tutupModalLaporan() {
+            modalLaporan.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            form.reset();
+        }
+
+        // ─── FUNGSI OPEN/CLOSE MODAL DETAIL DENGAN INTEGRASI TOMBOL AKSI ───
+        function bukaModalDetail(id, tipe) {
+            const item = dataSemuaBarang.find(x => x.id === id && x.tipe === tipe);
+            if (!item) return;
+
+            document.getElementById('detail-nama').innerText = item.item_name;
+            document.getElementById('detail-lokasi').innerHTML = `<i class="fa-solid fa-location-dot text-gray-400 mr-1"></i>${item.tipe === 'lost' ? item.lost_location : item.location}`;
+            document.getElementById('detail-tanggal').innerHTML = `<i class="fa-regular fa-clock text-gray-400 mr-1"></i>${formatWaktu(item.created_at)}`;
+            document.getElementById('detail-pelapor').innerHTML = `<i class="fa-solid fa-user text-gray-400 mr-1"></i>${item.contact_name || 'Petugas Smartbox'}`;
+            document.getElementById('detail-deskripsi').innerText = item.description || 'Tidak ada deskripsi.';
+
+            const statusEl = document.getElementById('detail-status');
+            const btnHapus = document.getElementById('detail-btn-hapus');
+            const btnKlaim = document.getElementById('detail-btn-klaim');
+            const btnHubungi = document.getElementById('detail-btn-hubungi');
+
+            // Set aksi click ke fungsi yang sudah ada di bawah
+            btnHapus.onclick = function() { hapusLogBarang(item.tipe, item.id); tutupModalDetail(); };
+            btnKlaim.onclick = function() { claimBarangTemuan(item.id); tutupModalDetail(); };
+            btnHubungi.onclick = function() { alert(`Hubungi kontak pelapor: ${item.contact_name}`); };
+
+            // Atur visibilitas tombol berdasarkan status & tipe barang
+            btnKlaim.classList.add('hidden');
+            btnHubungi.classList.remove('hidden');
+
+            if (item.tipe === 'lost') {
+                statusEl.innerText = "Hilang";
+                statusEl.className = "inline-block text-xs font-bold px-2 py-0.5 rounded-full uppercase mt-0.5 bg-red-100 text-red-800";
+            } else {
+                if (item.status === 'claimed') {
+                    statusEl.innerText = "Selesai / Diklaim";
+                    statusEl.className = "inline-block text-xs font-bold px-2 py-0.5 rounded-full uppercase mt-0.5 bg-green-100 text-green-800";
+                    btnHubungi.classList.add('hidden');
+                } else {
+                    statusEl.innerText = "Temuan";
+                    statusEl.className = "inline-block text-xs font-bold px-2 py-0.5 rounded-full uppercase mt-0.5 bg-blue-100 text-blue-800";
+                    btnKlaim.classList.remove('hidden');
+                }
+            }
+
+            const imgContainer = document.getElementById('detail-foto-container');
+            const imgEl = document.getElementById('detail-foto');
+            if (item.image_url) {
+                imgEl.src = `${BASE_URL}${item.image_url}`;
+                imgContainer.classList.remove('hidden');
+            } else {
+                imgContainer.classList.add('hidden');
+            }
+
+            document.getElementById('modal-detail-barang').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function tutupModalDetail() {
+            document.getElementById('modal-detail-barang').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function switchSection(targetView) {
+            if (targetView === 'feed') {
+                tabFeed.classList.add('tab-active');
+                tabList.classList.remove('tab-active');
+                viewFeed.classList.remove('hidden');
+                viewList.classList.add('hidden');
+            } else {
+                tabList.classList.add('tab-active');
+                tabFeed.classList.remove('tab-active');
+                viewList.classList.remove('hidden');
+                viewFeed.classList.add('hidden');
+            }
+        }
+
+        function formatWaktu(dateString) {
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+            } catch(e) { return "Baru Saja"; }
+        }
+
+        async function muatDataBarang() {
+            try {
+                const [resFound, resLost] = await Promise.all([
+                    fetch(`${BASE_URL}/api/items/found`),
+                    fetch(`${BASE_URL}/api/items/lost`)
+                ]);
+
+                if (!resFound.ok || !resLost.ok) throw new Error("Gagal mengambil data");
+
+                const foundItems = await resFound.json();
+                const lostItems = await resLost.json();
+
+                statHilangEl.innerText = lostItems.length;
+                statTemuanEl.innerText = foundItems.filter(i => i.status === 'unclaimed').length;
+                statSelesaiEl.innerText = foundItems.filter(i => i.status === 'claimed').length;
+
+                dataSemuaBarang = [
+                    ...lostItems.map(item => ({...item, tipe: 'lost'})),
+                    ...foundItems.map(item => ({...item, tipe: 'found'}))
+                ];
+
+                dataSemuaBarang.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                
+                itemsTerpilih = [];
+                updatePanelAksiMassal();
+                jalankanFilterDanPencarian();
+            } catch (error) {
+                console.error(error);
+                const errorMsg = '<p class="text-red-500 col-span-full text-center py-10">Gagal memuat data dari server backend.</p>';
+                feedContainer.innerHTML = errorMsg;
+                listContainer.innerHTML = errorMsg;
+            }
+        }
+
+        function gantiKategoriFilter(kategori) {
+            filterKategoriAktif = kategori;
+            
+            ['all', 'unclaimed', 'claimed'].forEach(k => {
+                const btn = document.getElementById(`filter-${k}`);
+                if (k === kategori) {
+                    btn.className = "px-4 py-1.5 border rounded-full text-xs font-bold transition shadow-sm filter-btn-active";
+                } else {
+                    btn.className = "px-4 py-1.5 border rounded-full text-xs font-bold transition shadow-sm bg-white text-gray-600 border-gray-300 hover:bg-gray-50";
+                }
+            });
+
+            jalankanFilterDanPencarian();
+        }
+
+        function jalankanFilterDanPencarian() {
+            const kataKunci = document.getElementById('input-pencarian').value.toLowerCase().trim();
+            
+            let hasilData = dataSemuaBarang;
+
+            if (filterKategoriAktif === 'unclaimed') {
+                hasilData = dataSemuaBarang.filter(item => item.tipe === 'lost' || (item.tipe === 'found' && item.status !== 'claimed'));
+            } else if (filterKategoriAktif === 'claimed') {
+                hasilData = dataSemuaBarang.filter(item => item.tipe === 'found' && item.status === 'claimed');
+            }
+
+            if (kataKunci !== '') {
+                hasilData = hasilData.filter(item => {
+                    const nama = item.item_name.toLowerCase();
+                    const lokasi = (item.tipe === 'lost' ? item.lost_location : item.location).toLowerCase();
+                    return nama.includes(kataKunci) || lokasi.includes(kataKunci);
+                });
+            }
+
+            renderKeLayar(hasilData);
+        }
+
+        function handleCheckboxChange(checkbox, id, tipe) {
+            if (checkbox.checked) {
+                itemsTerpilih.push({ id, tipe });
+            } else {
+                itemsTerpilih = itemsTerpilih.filter(item => !(item.id === id && item.tipe === tipe));
+            }
+            updatePanelAksiMassal();
+            sinkronkanStateCheckboxKeduanya(id, tipe, checkbox.checked);
+        }
+
+        document.addEventListener('click', function(event) {
+            if (itemsTerpilih.length > 0) {
+                const isClickInsideControl = document.getElementById('area-kontrol-utama').contains(event.target);
+                const isClickInsideFeed = feedContainer.contains(event.target);
+                const isClickInsideList = listContainer.contains(event.target);
+                const isClickInsideNav = document.getElementById('section-nav-bar').contains(event.target);
+                const isClickInsideFilter = event.target.closest('#filter-all') || event.target.closest('#filter-unclaimed') || event.target.closest('#filter-claimed');
+
+                if (!isClickInsideControl && !isClickInsideFeed && !isClickInsideList && !isClickInsideNav && !isClickInsideFilter) {
+                    togglePilihSemua(false);
+                }
+            }
+        });
+
+        function sinkronkanStateCheckboxKeduanya(id, tipe, isChecked) {
+            const cbFeed = document.getElementById(`cb-feed-${tipe}-${id}`);
+            const cbList = document.getElementById(`cb-list-${tipe}-${id}`);
+            if(cbFeed) cbFeed.checked = isChecked;
+            if(cbList) cbList.checked = isChecked;
+        }
+
+        function togglePilihSemua(statusCentang) {
+            const kataKunci = document.getElementById('input-pencarian').value.toLowerCase().trim();
+            let barangTampil = dataSemuaBarang;
+
+            if (filterKategoriAktif === 'unclaimed') {
+                barangTampil = dataSemuaBarang.filter(item => item.tipe === 'lost' || (item.tipe === 'found' && item.status !== 'claimed'));
+            } else if (filterKategoriAktif === 'claimed') {
+                barangTampil = dataSemuaBarang.filter(item => item.tipe === 'found' && item.status === 'claimed');
+            }
+
+            if (kataKunci !== '') {
+                barangTampil = barangTampil.filter(item => {
+                    const nama = item.item_name.toLowerCase();
+                    const lokasi = (item.tipe === 'lost' ? item.lost_location : item.location).toLowerCase();
+                    return nama.includes(kataKunci) || lokasi.includes(kataKunci);
+                });
+            }
+
+            if (!statusCentang) {
+                itemsTerpilih = [];
+                dataSemuaBarang.forEach(item => sinkronkanStateCheckboxKeduanya(item.id, item.tipe, false));
+            } else {
+                barangTampil.forEach(item => {
+                    if (!itemsTerpilih.some(x => x.id === item.id && x.tipe === item.tipe)) {
+                        itemsTerpilih.push({ id: item.id, tipe: item.tipe });
+                    }
+                    sinkronkanStateCheckboxKeduanya(item.id, item.tipe, true);
+                });
+            }
+            updatePanelAksiMassal();
+        }
+
+        function updatePanelAksiMassal() {
+            if (itemsTerpilih.length > 0) {
+                panelAksiMassal.classList.remove('hidden');
+                txtJumlahTerpilih.innerText = `${itemsTerpilih.length} barang terpilih`;
+            } else {
+                panelAksiMassal.classList.add('hidden');
+            }
+        }
+
+        function renderKeLayar(daftarBarang) {
+            feedContainer.innerHTML = '';
+            listContainer.innerHTML = '';
+
+            if (daftarBarang.length === 0) {
+                const templateKosong = '<p class="text-gray-500 text-center py-10 col-span-full font-medium">Barang dengan kategori/pencarian ini tidak ditemukan.</p>';
+                feedContainer.innerHTML = templateKosong;
+                listContainer.innerHTML = templateKosong;
+                return;
+            }
+
+            let listHtmlTable = `
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-sm" onclick="event.stopPropagation()">
+                        <thead>
+                            <tr class="bg-gray-100 border-b border-gray-200 text-gray-700 font-bold uppercase text-xs">
+                                <th class="p-3 w-12 text-center">Pilih</th>
+                                <th class="p-3 w-24">Tipe Log</th>
+                                <th class="p-3">Nama Barang</th>
+                                <th class="p-3">Lokasi</th>
+                                <th class="p-3">Tanggal</th>
+                                <th class="p-3 text-center">Opsi Tindakan</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+            `;
+
+            daftarBarang.forEach(item => {
+                const lokasiTeks = item.tipe === 'lost' ? item.lost_location : item.location;
+                const isTercentang = itemsTerpilih.some(x => x.id === item.id && x.tipe === item.tipe) ? 'checked' : '';
+                
+                // ==================== ICON VIEW (GRID) ====================
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200 hover:shadow-md transition flex flex-col justify-between relative cursor-pointer";
+                card.setAttribute('onclick', `bukaModalDetail(${item.id}, '${item.tipe}')`);
+                
+                const imgTag = item.image_url ? `<div class="w-full h-40 bg-gray-100 border-b overflow-hidden mb-2"><img src="${BASE_URL}${item.image_url}" class="w-full h-full object-cover"></div>` : '';
+
+                if (item.tipe === 'lost') {
+                    card.innerHTML = `
+                        <div class="p-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <div class="flex items-center space-x-2" onclick="event.stopPropagation();">
+                                    <input type="checkbox" id="cb-feed-lost-${item.id}" ${isTercentang} onchange="handleCheckboxChange(this, ${item.id}, 'lost')" class="w-4 h-4 text-blue-900 rounded focus:ring-blue-500">
+                                    <span class="bg-red-100 text-red-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase">Hilang</span>
+                                </div>
+                                <span class="text-xs text-gray-400 font-medium"><i class="fa-regular fa-clock mr-1"></i>${formatWaktu(item.created_at)}</span>
+                            </div>
+                            ${imgTag}
+                            <h3 class="font-bold text-base text-gray-900 mb-1">${item.item_name}</h3>
+                            <p class="text-xs text-gray-600 mb-3 line-clamp-2">${item.description || 'Tidak ada deskripsi.'}</p>
+                            <div class="border-t pt-2 text-[11px] text-gray-500 space-y-0.5">
+                                <div><i class="fa-solid fa-location-dot w-4"></i> <span class="font-semibold">Lokasi:</span> ${lokasiTeks}</div>
+                                <div><i class="fa-solid fa-user w-4"></i> <span class="font-semibold">Pelapor:</span> ${item.contact_name}</div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 px-4 py-2 border-t flex justify-between items-center text-xs" onclick="event.stopPropagation();">
+                            <button onclick="hapusLogBarang('lost', ${item.id}); event.stopPropagation();" class="text-red-500 hover:text-red-700 font-medium transition"><i class="fa-solid fa-trash mr-1"></i>Hapus</button>
+                            <button onclick="alert('Hubungi kontak pelapor: ${item.contact_name}'); event.stopPropagation();" class="font-bold text-blue-900 hover:text-blue-700"><i class="fa-solid fa-envelope mr-1"></i>Hubungi</button>
+                        </div>
+                    `;
+                } else {
+                    const isClaimed = item.status === 'claimed';
+                    const badgeColor = isClaimed ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800';
+                    card.innerHTML = `
+                        <div class="p-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <div class="flex items-center space-x-2" onclick="event.stopPropagation();">
+                                    <input type="checkbox" id="cb-feed-found-${item.id}" ${isTercentang} onchange="handleCheckboxChange(this, ${item.id}, 'found')" class="w-4 h-4 text-blue-900 rounded focus:ring-blue-500">
+                                    <span class="${badgeColor} text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase">${isClaimed ? 'Selesai' : 'Temuan'}</span>
+                                </div>
+                                <span class="text-xs text-gray-400 font-medium"><i class="fa-regular fa-clock mr-1"></i>${formatWaktu(item.created_at)}</span>
+                            </div>
+                            ${imgTag}
+                            <h3 class="font-bold text-base text-gray-900 mb-1">${item.item_name}</h3>
+                            <p class="text-xs text-gray-600 mb-3 line-clamp-2">${item.description || 'Tidak ada deskripsi.'}</p>
+                            <div class="border-t pt-2 text-[11px] text-gray-500 space-y-0.5">
+                                <div><i class="fa-solid fa-location-dot w-4"></i> <span class="font-semibold">Lokasi:</span> ${lokasiTeks}</div>
+                                <div><i class="fa-solid fa-circle-info w-4"></i> <span class="font-semibold">Status:</span> ${isClaimed ? 'Sudah Diambil' : 'Di Smartbox'}</div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 px-4 py-2 border-t flex justify-between items-center text-xs" onclick="event.stopPropagation();">
+                            <button onclick="hapusLogBarang('found', ${item.id}); event.stopPropagation();" class="text-red-500 hover:text-red-700 font-medium transition"><i class="fa-solid fa-trash mr-1"></i>Hapus</button>
+                            ${!isClaimed ? `<button onclick="claimBarangTemuan(${item.id}); event.stopPropagation();" class="font-bold text-green-600 hover:text-green-800"><i class="fa-solid fa-circle-check mr-1"></i>Klaim</button>` : '<span class="text-gray-400 font-semibold"><i class="fa-solid fa-check-double"></i> Selesai</span>'}
+                        </div>
+                    `;
+                }
+                feedContainer.appendChild(card);
+
+                // ==================== LIST VIEW (TABLE) ====================
+                const labelBadgeList = item.tipe === 'lost' 
+                    ? '<span class="bg-red-100 text-red-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Hilang</span>' 
+                    : (item.status === 'claimed' ? '<span class="bg-green-100 text-green-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Selesai</span>' : '<span class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Temuan</span>');
+
+                const btnKlaimList = (item.tipe === 'found' && item.status !== 'claimed') 
+                    ? `<button onclick="claimBarangTemuan(${item.id}); event.stopPropagation();" title="Tandai Sudah Dikembalikan" class="text-green-600 hover:text-green-800 transition"><i class="fa-solid fa-circle-check text-base"></i></button>` 
+                    : (item.tipe === 'lost' ? `<button onclick="alert('Hubungi kontak pelapor: ${item.contact_name}'); event.stopPropagation();" title="Hubungi" class="text-blue-600 hover:text-blue-800 transition"><i class="fa-solid fa-envelope"></i></button>` : `<span class="text-gray-400"><i class="fa-solid fa-check-double"></i></span>`);
+
+                listHtmlTable += `
+                    <tr class="hover:bg-gray-50 text-gray-700 transition cursor-pointer" onclick="bukaModalDetail(${item.id}, '${item.tipe}')">
+                        <td class="p-3 text-center" onclick="event.stopPropagation();">
+                            <input type="checkbox" id="cb-list-${item.tipe}-${item.id}" ${isTercentang} onchange="handleCheckboxChange(this, ${item.id}, '${item.tipe}')" class="w-4 h-4 text-blue-900 rounded focus:ring-blue-500">
+                        </td>
+                        <td class="p-3 font-medium">${labelBadgeList}</td>
+                        <td class="p-3 font-bold text-gray-900">${item.item_name}</td>
+                        <td class="p-3 text-xs"><i class="fa-solid fa-location-dot text-gray-400 mr-1"></i>${lokasiTeks || '-'}</td>
+                        <td class="p-3 text-xs text-gray-500">${formatWaktu(item.created_at)}</td>
+                        <td class="p-3 text-center space-x-3" onclick="event.stopPropagation();">
+                            ${btnKlaimList}
+                            <button onclick="hapusLogBarang('${item.tipe}', ${item.id}); event.stopPropagation();" title="Hapus Permanen" class="text-red-500 hover:text-red-700 transition"><i class="fa-solid fa-trash-can"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            listHtmlTable += '</tbody></table></div>';
+            listContainer.innerHTML = listHtmlTable;
+        }
+
+        async function eksekusiKlaimMassal() {
+            const itemsFoundTerpilih = itemsTerpilih.filter(x => x.tipe === 'found');
+            if(itemsFoundTerpilih.length === 0) {
+                alert("Hanya laporan berjenis 'Temuan' yang dapat ditandai klaim/selesai.");
+                return;
+            }
+            if (!confirm(`Tandai ${itemsFoundTerpilih.length} barang temuan terpilih sudah selesai dikembalikan?`)) return;
+            
+            try {
+                await Promise.all(itemsFoundTerpilih.map(item => 
+                    fetch(`${BASE_URL}/api/items/found/${item.id}/claim`, { method: 'PATCH' })
+                ));
+                alert("Status sukses diperbarui massal!");
+                muatDataBarang();
+            } catch (err) { alert("Terjadi masalah saat memperbarui status."); }
+        }
+
+        async function eksekusiHapusMassal() {
+            if (!confirm(`Apakah Anda yakin ingin menghapus secara permanen ${itemsTerpilih.length} log laporan terpilih?`)) return;
+            try {
+                await Promise.all(itemsTerpilih.map(item => {
+                    const url = item.tipe === 'lost' ? `${BASE_URL}/api/items/lost/${item.id}` : `${BASE_URL}/api/items/found/${item.id}`;
+                    return fetch(url, { method: 'DELETE' });
+                }));
+                alert("Log terpilih berhasil dibersihkan!");
+                muatDataBarang();
+            } catch (err) { alert("Terjadi kendala saat penghapusan massal."); }
+        }
+
+        async function claimBarangTemuan(itemId) {
+            try {
+                const response = await fetch(`${BASE_URL}/api/items/found/${itemId}/claim`, { method: 'PATCH' });
+                if (response.ok) { alert('Barang berhasil diklaim!'); muatDataBarang(); }
+            } catch (error) { console.error(error); }
+        }
+
+        async function hapusLogBarang(tipe, itemId) {
+            if (!confirm(`Hapus log ini dari database?`)) return;
+            try {
+                const targetUrl = tipe === 'lost' ? `${BASE_URL}/api/items/lost/${itemId}` : `${BASE_URL}/api/items/found/${itemId}`;
+                const response = await fetch(targetUrl, { method: 'DELETE' });
+                if (response.ok) { alert('Log dihapus!'); muatDataBarang(); }
+            } catch (error) { console.error(error); }
+        }
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const status = document.querySelector('input[name="status"]:checked').value;
+            const formData = new FormData();
+            formData.append('item_name', document.getElementById('nama-barang').value);
+            formData.append('description', document.getElementById('deskripsi').value);
+
+            let urlTarget = '';
+            if (status === 'Hilang') {
+                urlTarget = `${BASE_URL}/api/items/lost`;
+                formData.append('lost_location', document.getElementById('lokasi').value);
+                formData.append('contact_name', document.getElementById('pelapor').value);
+            } else {
+                urlTarget = `${BASE_URL}/api/items/found/manual`;
+                formData.append('location', document.getElementById('lokasi').value);
+            }
+            if (fotoInput.files[0]) formData.append('image', fotoInput.files[0]);
+
+            try {
+                const response = await fetch(urlTarget, { method: 'POST', body: formData });
+                if (response.ok) { alert('Laporan berhasil disimpan!'); tutupModalLaporan(); muatDataBarang(); }
+            } catch (error) { console.error(error); }
+        });
+
+        document.addEventListener('DOMContentLoaded', muatDataBarang);
+    </script>
+</body>
+</html>

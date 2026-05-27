@@ -1,0 +1,79 @@
+# ─── Edge Device (Python script) ───────────────────────────────────────────────
+opencv-python==4.10.0.84       # Computer vision + webcam
+google-generativeai==0.8.3     # Gemini Vision API
+httpx==0.27.2                  # HTTP client (async-ready, lebih baik dari requests)
+Pillow==10.4.0                 # Image processing (resize, compress)
+python-dotenv==1.0.1           # Load .env untuk API keys
+
+# ─── Backend (FastAPI) ──────────────────────────────────────────────────────────
+fastapi==0.115.0
+uvicorn[standard]==0.32.0      # ASGI server
+sqlalchemy==2.0.36             # ORM
+python-multipart==0.0.12       # File upload support untuk FastAPI
+pydantic==2.9.2                # Data validation (sudah include di FastAPI)
+
+# ─── Untuk PostgreSQL (production, ganti SQLite) ─────────────────────────────
+# psycopg2-binary==2.9.10
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SETUP INSTRUCTIONS
+# ─────────────────────────────────────────────────────────────────────────────
+#
+# 1. Install dependencies:
+#    pip install -r requirements.txt
+#
+# 2. Set environment variables:
+#    Linux/Mac:
+#      export GEMINI_API_KEY="your_gemini_api_key_here"
+#      export SMARTBOX_BACKEND_URL="http://localhost:8000"
+#      export SMARTBOX_API_SECRET="ganti-dengan-secret-yang-kuat"
+#
+#    Windows (PowerShell):
+#      $env:GEMINI_API_KEY="your_gemini_api_key_here"
+#      $env:SMARTBOX_BACKEND_URL="http://localhost:8000"
+#      $env:SMARTBOX_API_SECRET="ganti-dengan-secret-yang-kuat"
+#
+#    Atau buat file .env dan load dengan python-dotenv:
+#      GEMINI_API_KEY=your_gemini_api_key_here
+#      SMARTBOX_BACKEND_URL=http://localhost:8000
+#      SMARTBOX_API_SECRET=ganti-dengan-secret-yang-kuat
+#
+# 3. Jalankan backend (dari folder /backend):
+#    uvicorn main:app --reload --port 8000
+#    → API docs tersedia di: http://localhost:8000/docs
+#
+# 4. Jalankan edge script (dari folder /edge):
+#    python detector.py
+#
+# 5. Buka index.html di browser (atau serve dengan:)
+#    python -m http.server 3000
+#    → Buka: http://localhost:3000
+#
+# ─────────────────────────────────────────────────────────────────────────────
+# TUNING PARAMETER DETEKSI
+# ─────────────────────────────────────────────────────────────────────────────
+#
+# Di detector.py, sesuaikan nilai ini:
+#
+# MOTION_THRESHOLD   = 3000   → Naikkan (5000-8000) jika terlalu sensitif terhadap bayangan
+#                               Turunkan (1000-2000) jika barang kecil tidak terdeteksi
+#
+# STABILITY_DURATION = 3.0    → Naikkan (5.0) jika barang masih bergerak saat di-capture
+#                               Turunkan (2.0) untuk respons lebih cepat
+#
+# STABILITY_THRESHOLD = 500   → Naikkan jika ruangan bergetar / ada kipas angin
+#
+# COOLDOWN_AFTER_SEND = 10.0  → Jeda setelah satu barang terkirim, mencegah duplicate
+#
+# ─────────────────────────────────────────────────────────────────────────────
+# TIPS PENEMPATAN KAMERA
+# ─────────────────────────────────────────────────────────────────────────────
+#
+# - Pasang webcam di ATAS kotak menghadap ke bawah (bird-eye view)
+#   → Memberikan area coverage terbaik dan menghindari motion dari luar kotak
+#
+# - Pastikan pencahayaan cukup dan konsisten (hindari sinar matahari langsung
+#   yang berubah-ubah karena akan memicu false positive)
+#
+# - Tutup sisi kotak agar background stabil
+#   → Background subtractor bekerja optimal di lingkungan statis
