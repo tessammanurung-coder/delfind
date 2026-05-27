@@ -87,15 +87,35 @@ Base.metadata.create_all(bind=engine)
 def apply_auto_migration():
     """
     Memeriksa tabel items_lost secara otomatis di database fisik.
+    Mendukung PostgreSQL (Render) dan SQLite (Lokal/Laptop).
     Jika kolom image_path belum tersedia, kolom akan disuntikkan secara aman.
     """
     with engine.connect() as conn:
-        result = conn.execute(text("PRAGMA table_info(items_lost);")).fetchall()
-        columns = [row[1] for row in result]
+        # Cek jenis database yang sedang aktif (postgresql atau sqlite)
+        is_postgres = conn.dialect.name == "postgresql"
         
+        if is_postgres:
+            # Query untuk PostgreSQL (Mengecek kolom di tabel items_lost)
+            query = text("""
+                SELECT column_name 
+                FROM information_schema.columns 
+                WHERE table_name = 'items_lost';
+            """)
+            result = conn.execute(query).fetchall()
+            columns = [row[0] for row in result] # PostgreSQL mengembalikan nama kolom di indeks 0
+        else:
+            # Fallback untuk SQLite di laptop lokal
+            result = conn.execute(text("PRAGMA table_info(items_lost);")).fetchall()
+            columns = [row[1] for row in result] # SQLite mengembalikan nama kolom di indeks 1
+        
+        # Logika penyuntikan kolom image_path secara aman
         if "image_path" not in columns:
             try:
-                conn.execute(text("ALTER TABLE items_lost ADD COLUMN image_path VARCHAR(500);"))
+                if is_postgres:
+                    conn.execute(text("ALTER TABLE items_lost ADD COLUMN image_path VARCHAR(500);"))
+                else:
+                    conn.execute(text("ALTER TABLE items_lost ADD COLUMN image_path TEXT;"))
+                
                 conn.commit()
                 print("======= AUTO MIGRATION: Kolom image_path berhasil ditambahkan ke tabel items_lost! =======")
             except Exception as e:
