@@ -32,7 +32,17 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 JAKARTA_TZ = pytz.timezone("Asia/Jakarta")
 
 # ─── Database Setup ───────────────────────────────────────────────────────────
-engine       = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+if DATABASE_URL:
+    # 1. Perbaiki format jika menggunakan skema lama postgres://
+    if DATABASE_URL.startswith("postgres://"):
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    
+    # 2. Engine untuk PostgreSQL (Tanpa check_same_thread, tambah SSL)
+    engine = create_engine(DATABASE_URL, connect_args={"sslmode": "require"})
+else:
+    # 3. Fallback ke SQLite jika dijalankan di lokal laptop
+    DATABASE_URL = f"sqlite:///{BASE_DIR}/smartbox.db"
+    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base         = declarative_base()
 
