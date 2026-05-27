@@ -24,7 +24,8 @@ from pydantic import BaseModel
 
 
 # ─── Konfigurasi ─────────────────────────────────────────────────────────────
-DATABASE_URL  = os.environ.get("DATABASE_URL", "sqlite:///./smartbox.db")
+BASE_DIR = Path(__file__).resolve().parent
+DATABASE_URL = os.environ.get("DATABASE_URL", f"sqlite:///{BASE_DIR}/smartbox.db")
 UPLOAD_DIR    = Path("uploads")
 API_SECRET    = os.environ.get("SMARTBOX_API_SECRET", "rahasia123") 
 UPLOAD_DIR.mkdir(exist_ok=True)
