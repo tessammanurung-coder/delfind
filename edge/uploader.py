@@ -14,7 +14,7 @@ import httpx
 
 log = logging.getLogger("Smartbox.Uploader")
 
-BACKEND_URL = os.environ.get("SMARTBOX_BACKEND_URL", "http://localhost:8000")
+BACKEND_URL = os.environ.get("SMARTBOX_BACKEND_URL", "http://localhost:8000/api/items/found")
 API_SECRET  = os.environ.get("SMARTBOX_API_SECRET", "rahasia123")
 
 
